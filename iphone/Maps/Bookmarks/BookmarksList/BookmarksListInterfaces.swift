@@ -6,6 +6,11 @@ enum BookmarksListVisibilityButtonState {
   case showAll
 }
 
+enum BookmarkToolbarButtonSource {
+  case sort
+  case more
+}
+
 protocol IBookmarksListSectionViewModel {
   var numberOfItems: Int { get }
   var sectionTitle: String { get }
@@ -51,7 +56,7 @@ protocol IBookmarksListView: AnyObject {
   func setInfo(_ info: IBookmarksListInfoViewModel)
   func setSections(_ sections: [IBookmarksListSectionViewModel])
   func setMoreItemTitle(_ itemTitle: String)
-  func showMenu(_ items: [IBookmarksListMenuItem])
+  func showMenu(_ items: [IBookmarksListMenuItem], from source: BookmarkToolbarButtonSource)
   func showColorPicker(with pickerType: ColorPickerType, _ completion: ((UIColor) -> Void)?)
   func enableEditing(_ enable: Bool)
   func share(_ url: URL, completion: @escaping () -> Void)
@@ -80,6 +85,7 @@ enum BookmarksListSortingType {
   case distance
   case date
   case type
+  case name
 }
 
 protocol IBookmarksListInteractor {
@@ -105,7 +111,7 @@ protocol IBookmarksListInteractor {
   func updateTrack(_ trackId: MWMTrackID, setGroupId groupId: MWMMarkGroupID)
   func deleteBookmarksGroup()
   func canDeleteGroup() -> Bool
-  func exportFile(_ completion: @escaping (URL?, ExportFileStatus) -> Void)
+  func exportFile(_ completion: @escaping SharingResultCompletionHandler)
   func finishExportFile()
 }
 

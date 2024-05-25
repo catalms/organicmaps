@@ -2,7 +2,6 @@
 #import <CoreApi/MWMBookmarksManager.h>
 #import "EAGLView.h"
 #import "MWMAuthorizationCommon.h"
-#import "MWMAuthorizationWebViewLoginViewController.h"
 #import "MWMAutoupdateController.h"
 #import "MWMEditorViewController.h"
 #import "MWMFrameworkListener.h"
@@ -85,7 +84,7 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
 @property(strong, nonatomic) IBOutlet NSLayoutConstraint *placePageAreaKeyboard;
 @property(strong, nonatomic) IBOutlet NSLayoutConstraint *sideButtonsAreaBottom;
 @property(strong, nonatomic) IBOutlet NSLayoutConstraint *sideButtonsAreaKeyboard;
-@property(strong, nonatomic) IBOutlet UIImageView *carplayPlaceholderLogo;
+@property(strong, nonatomic) IBOutlet UIView *carplayPlaceholderView;
 @property(strong, nonatomic) BookmarksCoordinator * bookmarksCoordinator;
 
 @property(strong, nonatomic) NSHashTable<id<MWMLocationModeListener>> *listeners;
@@ -339,6 +338,10 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
 
   if ([MWMNavigationDashboardManager sharedManager].state == MWMNavigationDashboardStateHidden)
     self.controlsManager.menuState = self.controlsManager.menuRestoreState;
+  
+  // Added in https://github.com/organicmaps/organicmaps/pull/7333
+  // After all users migrate to OAuth2 we can remove next code
+  [self migrateOAuthCredentials];
 
   /// @todo: Uncomment update dialog when will be ready to handle big traffic bursts.
   /*
@@ -368,7 +371,7 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
 
 - (void)viewDidLayoutSubviews {
   [super viewDidLayoutSubviews];
-  if (!self.mapView.drapeEngineCreated)
+  if (!self.mapView.drapeEngineCreated && !MapsAppDelegate.isDrapeDisabled)
     [self.mapView createDrapeEngine];
 }
 
@@ -393,7 +396,6 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
   [self.alertController presentEditorViralAlert];
 
   [ud setObject:[NSDate date] forKey:kUDViralAlertWasShown];
-  [ud synchronize];
 }
 
 - (void)viewWillDisappear:(BOOL)animated {
@@ -418,6 +420,15 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
 - (void)updateStatusBarStyle {
   [self setNeedsStatusBarAppearanceUpdate];
 }
+
+- (void)migrateOAuthCredentials {
+  if (osm_auth_ios::AuthorizationHaveOAuth1Credentials())
+  {
+    osm_auth_ios::AuthorizationClearOAuth1Credentials();
+    [self.alertController presentOsmReauthAlert];
+  }
+}
+
 - (id)initWithCoder:(NSCoder *)coder {
   NSLog(@"MapViewController initWithCoder Started");
   self = [super initWithCoder:coder];
@@ -587,12 +598,6 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
     MWMDownloadMapsViewController *dvc = segue.destinationViewController;
     NSNumber *mode = sender;
     dvc.mode = (MWMMapDownloaderMode)mode.integerValue;
-  } else if ([segue.identifier isEqualToString:kMap2FBLoginSegue]) {
-    MWMAuthorizationWebViewLoginViewController *dvc = segue.destinationViewController;
-    dvc.authType = MWMWebViewAuthorizationTypeFacebook;
-  } else if ([segue.identifier isEqualToString:kMap2GoogleLoginSegue]) {
-    MWMAuthorizationWebViewLoginViewController *dvc = segue.destinationViewController;
-    dvc.authType = MWMWebViewAuthorizationTypeGoogle;
   }
 }
 
@@ -658,7 +663,7 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
 #pragma mark - CarPlay map append/remove
 
 - (void)disableCarPlayRepresentation {
-  self.carplayPlaceholderLogo.hidden = YES;
+  self.carplayPlaceholderView.hidden = YES;
   self.mapView.frame = self.view.bounds;
   [self.view insertSubview:self.mapView atIndex:0];
   [[self.mapView.topAnchor constraintEqualToAnchor:self.view.topAnchor] setActive:YES];
@@ -680,7 +685,7 @@ NSString *const kPP2BookmarkEditingSegue = @"PP2BookmarkEditing";
   if (!self.controlsView.isHidden) {
     self.controlsView.hidden = YES;
   }
-  self.carplayPlaceholderLogo.hidden = NO;
+  self.carplayPlaceholderView.hidden = NO;
 }
 
 #pragma mark - MWMBookmarksObserver

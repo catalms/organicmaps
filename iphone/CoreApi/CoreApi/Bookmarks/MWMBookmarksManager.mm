@@ -66,6 +66,8 @@ static MWMBookmarksSortingType convertSortingType(BookmarkManager::SortingType c
       return MWMBookmarksSortingTypeByDistance;
     case BookmarkManager::SortingType::ByTime:
       return MWMBookmarksSortingTypeByTime;
+    case BookmarkManager::SortingType::ByName:
+      return MWMBookmarksSortingTypeByName;
   }
 }
 
@@ -77,6 +79,8 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
       return BookmarkManager::SortingType::ByDistance;
     case MWMBookmarksSortingTypeByTime:
       return BookmarkManager::SortingType::ByTime;
+    case MWMBookmarksSortingTypeByName:
+      return BookmarkManager::SortingType::ByName;
   }
 }
 
@@ -190,9 +194,13 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
 
 #pragma mark - Categories
 
-- (BOOL)isCategoryNotEmpty:(MWMMarkGroupID)groupId {
-  return self.bm.HasBmCategory(groupId) &&
-  (self.bm.GetUserMarkIds(groupId).size() + self.bm.GetTrackIds(groupId).size());
+- (BOOL)areAllCategoriesEmpty
+{
+  return self.bm.AreAllCategoriesEmpty();
+}
+
+- (BOOL)isCategoryEmpty:(MWMMarkGroupID)groupId {
+  return self.bm.HasBmCategory(groupId) && self.bm.IsCategoryEmpty(groupId);
 }
 
 - (void)prepareForSearch:(MWMMarkGroupID)groupId {
@@ -558,34 +566,28 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
 
 #pragma mark - Category sharing
 
-- (void)shareCategory:(MWMMarkGroupID)groupId
-{
-  self.bm.PrepareFileForSharing({groupId}, [self](auto sharingResult)
-  {
-    [self handleSharingResult:sharingResult];
+- (void)shareCategory:(MWMMarkGroupID)groupId completion:(SharingResultCompletionHandler)completion {
+  self.bm.PrepareFileForSharing({groupId}, [self, completion](auto sharingResult) {
+    [self handleSharingResult:sharingResult completion:completion];
   });
 }
 
-- (void)shareAllCategories
-{
-  self.bm.PrepareAllFilesForSharing([self](auto sharingResult)
-  {
-    [self handleSharingResult:sharingResult];
+- (void)shareAllCategoriesWithCompletion:(SharingResultCompletionHandler)completion {
+  self.bm.PrepareAllFilesForSharing([self, completion](auto sharingResult) {
+    [self handleSharingResult:sharingResult completion:completion];
   });
 }
 
-- (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult
-{
+- (void)handleSharingResult:(BookmarkManager::SharingResult)sharingResult completion:(SharingResultCompletionHandler)completion  {
+  NSURL *urlToALocalFile = nil;
   MWMBookmarksShareStatus status;
-  switch (sharingResult.m_code)
-  {
+  switch (sharingResult.m_code) {
     case BookmarkManager::SharingResult::Code::Success:
-    {
-      self.shareCategoryURL = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
-      ASSERT(self.shareCategoryURL, ("Invalid share category url"));
+      urlToALocalFile = [NSURL fileURLWithPath:@(sharingResult.m_sharingPath.c_str()) isDirectory:NO];
+      ASSERT(urlToALocalFile, ("Invalid share category URL"));
+      self.shareCategoryURL = urlToALocalFile;
       status = MWMBookmarksShareStatusSuccess;
       break;
-    }
     case BookmarkManager::SharingResult::Code::EmptyCategory:
       status = MWMBookmarksShareStatusEmptyCategory;
       break;
@@ -596,16 +598,7 @@ static BookmarkManager::SortingType convertSortingTypeToCore(MWMBookmarksSorting
       status = MWMBookmarksShareStatusFileError;
       break;
   }
-
-  [self loopObservers:^(id<MWMBookmarksObserver> observer) {
-    if ([observer respondsToSelector:@selector(onBookmarksCategoryFilePrepared:)])
-      [observer onBookmarksCategoryFilePrepared:status];
-  }];
-}
-
-- (NSURL *)shareCategoryURL {
-  NSAssert(_shareCategoryURL != nil, @"Invalid share category url");
-  return _shareCategoryURL;
+  completion(status, urlToALocalFile);
 }
 
 - (void)finishShareCategory {

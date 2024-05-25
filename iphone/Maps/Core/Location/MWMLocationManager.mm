@@ -102,7 +102,6 @@ BOOL needShowLocationAlert() {
 void setShowLocationAlert(BOOL needShow) {
   NSUserDefaults * ud = NSUserDefaults.standardUserDefaults;
   [ud setBool:needShow forKey:kLocationAlertNeedShowKey];
-  [ud synchronize];
 }
 }  // namespace
 
@@ -376,7 +375,7 @@ void setShowLocationAlert(BOOL needShow) {
     break;
   case GeoMode::PedestrianRouting:
   case GeoMode::BicycleRouting:
-    locationManager.activityType = CLActivityTypeFitness;
+    locationManager.activityType = CLActivityTypeOtherNavigation;
     break;
   }
 
@@ -485,7 +484,7 @@ void setShowLocationAlert(BOOL needShow) {
 - (void)startUpdatingLocationFor:(CLLocationManager *)manager
 {
   LOG(LINFO, ("startUpdatingLocation"));
-  
+
   [manager startUpdatingLocation];
   if ([CLLocationManager headingAvailable])
     [manager startUpdatingHeading];
