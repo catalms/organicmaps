@@ -60,6 +60,8 @@ final class RoutingBottomMenuController implements View.OnClickListener
   @NonNull
   private final Button mStart;
   @NonNull
+  private final Button mManageRoute;
+  @NonNull
   private final ImageView mAltitudeChart;
   @NonNull
   private final TextView mTime;
@@ -92,6 +94,7 @@ final class RoutingBottomMenuController implements View.OnClickListener
     View transitFrame = getViewById(activity, frame, R.id.transit_panel);
     TextView error = (TextView) getViewById(activity, frame, R.id.error);
     Button start = (Button) getViewById(activity, frame, R.id.start);
+    Button manageRoute = (Button) getViewById(activity, frame, R.id.manage_route);
     ImageView altitudeChart = (ImageView) getViewById(activity, frame, R.id.altitude_chart);
     TextView time = (TextView) getViewById(activity, frame, R.id.time);
     TextView timeVehicle = (TextView) getViewById(activity, frame, R.id.time_vehicle);
@@ -100,7 +103,7 @@ final class RoutingBottomMenuController implements View.OnClickListener
     View actionFrame = getViewById(activity, frame, R.id.routing_action_frame);
 
     return new RoutingBottomMenuController(activity, altitudeChartFrame, timeElevationLine, transitFrame,
-                                           error, start, altitudeChart, time, altitudeDifference,
+                                           error, start, manageRoute, altitudeChart, time, altitudeDifference,
                                            timeVehicle, arrival, actionFrame, listener);
   }
 
@@ -118,6 +121,7 @@ final class RoutingBottomMenuController implements View.OnClickListener
                                       @NonNull View transitFrame,
                                       @NonNull TextView error,
                                       @NonNull Button start,
+                                      @NonNull Button manageRoute,
                                       @NonNull ImageView altitudeChart,
                                       @NonNull TextView time,
                                       @NonNull TextView altitudeDifference,
@@ -132,6 +136,7 @@ final class RoutingBottomMenuController implements View.OnClickListener
     mTransitFrame = transitFrame;
     mError = error;
     mStart = start;
+    mManageRoute = manageRoute;
     mAltitudeChart = altitudeChart;
     mTime = time;
     mAltitudeDifference = altitudeDifference;
@@ -307,6 +312,7 @@ final class RoutingBottomMenuController implements View.OnClickListener
   {
     boolean result = show && RoutingController.get().isBuilt();
     UiUtils.showIf(result, mStart);
+    UiUtils.showIf(result, mManageRoute);
   }
 
   void saveRoutingPanelState(@NonNull Bundle outState)

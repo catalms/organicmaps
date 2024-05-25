@@ -368,6 +368,7 @@ public class PlacePageController extends Fragment implements
       case ROUTE_AVOID_TOLL -> onAvoidTollBtnClicked();
       case ROUTE_AVOID_UNPAVED -> onAvoidUnpavedBtnClicked();
       case ROUTE_AVOID_FERRY -> onAvoidFerryBtnClicked();
+      case MANAGE_ROUTE -> onManageRouteBtnCLicked();
     }
   }
 
@@ -457,6 +458,8 @@ public class PlacePageController extends Fragment implements
     if (mMapObject != null)
       mPlacePageRouteSettingsListener.onPlacePageRequestToggleRouteSettings(roadType);
   }
+
+  private void onManageRouteBtnCLicked() {}
 
   private void removePlacePageFragments()
   {

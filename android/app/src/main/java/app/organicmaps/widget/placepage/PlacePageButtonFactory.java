@@ -57,6 +57,10 @@ public class PlacePageButtonFactory
         titleId = R.string.avoid_ferry;
         iconId = R.drawable.ic_avoid_ferry;
         break;
+      case MANAGE_ROUTE:
+        titleId = R.string.manage_route;
+        iconId = R.drawable.ic_menu_open;
+        break;
       case MORE:
         titleId = R.string.placepage_more_button;
         iconId = R.drawable.ic_more;
