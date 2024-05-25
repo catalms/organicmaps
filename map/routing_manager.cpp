@@ -832,12 +832,16 @@ size_t RoutingManager::GetRoutePointsCount() const
 }
 
 bool RoutingManager::CouldAddIntermediatePoint() const
-{
-  if (!IsRoutingActive())
-    return false;
+{    //if there isn't already a start or a finish point, we can't add an intermediate point
 
-  return m_bmManager->GetUserMarkIds(UserMark::Type::ROUTING).size()
-    < RoutePointsLayout::kMaxIntermediatePointsCount + 2;
+    RoutePointsLayout routePoints(*m_bmManager);
+    int pointsCount = routePoints.GetRoutePointsCount();
+    if ( pointsCount == 0){
+        return false;
+    }
+
+    return m_bmManager->GetUserMarkIds(UserMark::Type::ROUTING).size()
+           < RoutePointsLayout::kMaxIntermediatePointsCount + 2;
 }
 
 void RoutingManager::AddRoutePoint(RouteMarkData && markData)
