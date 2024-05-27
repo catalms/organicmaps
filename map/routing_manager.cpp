@@ -830,7 +830,6 @@ size_t RoutingManager::GetRoutePointsCount() const
 
 bool RoutingManager::CouldAddIntermediatePoint() const
 {
-
   //if there isn't already a start or a finish point, we can't add an intermediate point
   RoutePointsLayout routePoints(*m_bmManager);
   int pointsCount = routePoints.GetRoutePointsCount();
