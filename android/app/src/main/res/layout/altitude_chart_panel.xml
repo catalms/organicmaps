@@ -2,7 +2,6 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/altitude_chart_panel"
     android:layout_width="match_parent"
@@ -83,32 +82,4 @@
           tools:showIn="@layout/menu_route_plan_line"
           android:layout_gravity="center_vertical" />
     </LinearLayout>
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="16dp">
-
-        <ImageButton
-            android:id="@+id/manage_route"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/manage_route"
-            android:src="@drawable/ic_menu_open"
-            android:tint="#959393" />
-
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_toEndOf="@id/menu_button"
-            android:text="Manage Route"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:paddingLeft="20dp"/>
-
-    </RelativeLayout>
 </LinearLayout>
